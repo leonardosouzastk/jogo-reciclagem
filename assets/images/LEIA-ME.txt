@@ -1,0 +1,10 @@
+Esta pasta está pronta para receber sprites (.png) no futuro.
+
+Atualmente o jogo não usa nenhuma imagem: todo o visual (personagem,
+árvores, casas, lixeiras, resíduos etc.) é desenhado diretamente no
+Canvas com formas geométricas, para garantir que o jogo funcione 100%
+offline sem depender de nenhum arquivo externo.
+
+Veja a seção "Adicionando sprites/imagens no futuro" no README.md da
+raiz do projeto para instruções de como substituir os desenhos por
+imagens PNG.

@@ -1,0 +1,12 @@
+Esta pasta está pronta para receber arquivos de áudio (.mp3/.ogg/.wav)
+no futuro.
+
+Atualmente o jogo não usa nenhum arquivo de som: todos os efeitos
+sonoros (pegar item, acerto, erro, fase concluída) são GERADOS em
+tempo real por código, usando a Web Audio API (veja js/audio.js), para
+garantir que o jogo funcione 100% offline sem depender de nenhum
+download.
+
+Veja a seção "Adicionando músicas/efeitos sonoros de verdade" no
+README.md da raiz do projeto para instruções de como usar arquivos de
+áudio reais.
