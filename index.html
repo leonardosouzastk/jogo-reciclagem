@@ -1,111 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>♻️ Eco Aventura - Missão Reciclagem</title>
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#102e32">
+<title>Turminha da Reciclagem</title>
+<link rel="stylesheet" href="style.css"></head><body><main class="shell"><header class="mast"><div class="brand"><div class="brand-icon">♻️</div><div><h1>Turminha da Reciclagem</h1><p>Uma aventura pequena, uma cidade mais limpa 🌱</p></div></div><div class="audio"><span>♪ Música</span><button id="musicBtn" type="button" aria-label="Ligar ou desligar música">Ligada</button><label for="volume" aria-label="Volume da música">♫</label><input id="volume" type="range" min="0" max="100" value="28"></div></header>
+<section class="gameframe" aria-label="Jogo de reciclagem"><canvas id="game" width="960" height="640" aria-label="Área do jogo"></canvas><div class="hud" id="hud" hidden><div class="pill">📍 <span id="stageName">Quarto</span></div><div class="pill">⭐ <strong id="score">0</strong></div><div class="pill">🧺 <span id="progress">0/5</span></div><div class="spacer"></div><div class="pill">❤️ <span class="lives" id="lives">♥ ♥</span></div></div><div class="phasebar" id="phasebar" hidden><i id="phasefill"></i></div><div class="hint" id="hint" hidden>WASD mover &nbsp;·&nbsp; E interagir</div><div class="item-notice" id="itemNotice" hidden><span class="item-icon" id="itemIcon">♻️</span><span class="item-copy"><small>NA SUA MÃO</small><strong id="itemName">Resíduo</strong></span></div><div class="toast" id="toast"></div><div class="cover" id="cover"><div class="card"><span class="badge" id="badge">MISSÃO VERDE • 3 FASES</span><h2 id="title">A cidade precisa<br>da sua ajuda!</h2><p id="desc">Junte os resíduos e leve cada um para a lixeira da cor certa. Vamos deixar tudo brilhando? ✨</p><div class="swatches" id="swatches"></div><p id="instructions">⌨️ <b>W A S D</b> para andar &nbsp; · &nbsp; <b>SHIFT</b> correr &nbsp; · &nbsp; <b>E</b> pegar e separar<br>Chegue pertinho e aperte E. Cada fase começa com duas vidas!</p><div class="actions"><button class="cta" id="startBtn">Começar a aventura →</button><button class="secondary" id="secondaryBtn" hidden>Voltar ao início</button></div></div></div></section><footer class="help"><span class="keys">⌨️ <b>W A S D</b> mover &nbsp;·&nbsp; <b>SHIFT</b> correr &nbsp;·&nbsp; <b>E</b> pegar / separar &nbsp;·&nbsp; <b>ESC</b> pausar</span><span>Separar direitinho é um superpoder! 🍃</span></footer></main>
+<script src="script.js" defer></script></body></html>
 
-  <div id="game-container">
 
-    <!-- ================= CANVAS DO JOGO ================= -->
-    <canvas id="game-canvas" width="1280" height="720"></canvas>
 
-    <!-- ================= TELA INICIAL ================= -->
-    <section id="screen-start" class="screen">
-      <div class="menu-panel">
-        <h1 class="game-title">♻️ ECO AVENTURA</h1>
-        <p class="game-subtitle">Uma missão pela reciclagem</p>
-        <div class="menu-buttons">
-          <button id="btn-play" class="retro-btn retro-btn-primary">JOGAR</button>
-          <button id="btn-howto" class="retro-btn">COMO JOGAR</button>
-        </div>
-        <p class="menu-footnote">Use W A S D ou as setas para explorar o mapa</p>
-      </div>
-    </section>
 
-    <!-- ================= TELA COMO JOGAR ================= -->
-    <section id="screen-howto" class="screen hidden">
-      <div class="menu-panel">
-        <h2 class="screen-heading">COMO JOGAR</h2>
-        <ul class="howto-list">
-          <li><span class="key-badge">W A S D</span> ou <span class="key-badge">SETAS</span> — andar pelo mapa</li>
-          <li><span class="key-badge">E</span> / <span class="key-badge">ENTER</span> / <span class="key-badge">ESPAÇO</span> — pegar resíduos e descartar</li>
-          <li><span class="key-badge">ESC</span> — pausar o jogo</li>
-        </ul>
-        <p class="howto-text">Explore o mapa e encontre os resíduos espalhados pelo cenário. Pegue-os e leve até a lixeira correta:</p>
-        <div class="bin-legend">
-          <div class="bin-chip bin-papel">PAPEL</div>
-          <div class="bin-chip bin-plastico">PLÁSTICO</div>
-          <div class="bin-chip bin-vidro">VIDRO</div>
-          <div class="bin-chip bin-metal">METAL</div>
-          <div class="bin-chip bin-organico">ORGÂNICO</div>
-        </div>
-        <p class="howto-text">Acertos aumentam sua pontuação e seu combo. Erros reduzem pontos e zeram o combo — mas você aprende com a dica que aparece na tela!</p>
-        <button id="btn-howto-back" class="retro-btn retro-btn-primary">VOLTAR</button>
-      </div>
-    </section>
 
-    <!-- ================= TELA DE PAUSA ================= -->
-    <section id="screen-pause" class="screen hidden">
-      <div class="menu-panel">
-        <h2 class="screen-heading">JOGO PAUSADO</h2>
-        <div class="menu-buttons">
-          <button id="btn-resume" class="retro-btn retro-btn-primary">CONTINUAR</button>
-          <button id="btn-restart-phase" class="retro-btn">REINICIAR FASE</button>
-          <button id="btn-back-menu" class="retro-btn">VOLTAR AO MENU</button>
-        </div>
-      </div>
-    </section>
 
-    <!-- ================= TELA DE FASE CONCLUÍDA ================= -->
-    <section id="screen-phase-complete" class="screen hidden">
-      <div class="menu-panel">
-        <h2 id="phase-complete-title" class="screen-heading">FASE CONCLUÍDA!</h2>
-        <div class="stats-box">
-          <div class="stat-row"><span>Pontuação</span><strong id="stat-score">0</strong></div>
-          <div class="stat-row"><span>Acertos</span><strong id="stat-correct">0</strong></div>
-          <div class="stat-row"><span>Erros</span><strong id="stat-wrong">0</strong></div>
-          <div class="stat-row"><span>Melhor combo</span><strong id="stat-combo">x0</strong></div>
-          <div class="stat-row"><span>Resíduos reciclados</span><strong id="stat-recycled">0</strong></div>
-        </div>
-        <button id="btn-next-phase" class="retro-btn retro-btn-primary">PRÓXIMA FASE</button>
-      </div>
-    </section>
 
-    <!-- ================= TELA FINAL DO JOGO ================= -->
-    <section id="screen-game-complete" class="screen hidden">
-      <div class="menu-panel">
-        <h2 class="screen-heading">🏆 MISSÃO CUMPRIDA!</h2>
-        <p class="howto-text">Você concluiu todas as fases do Eco Aventura e ajudou o planeta com a coleta seletiva!</p>
-        <div class="stats-box">
-          <div class="stat-row"><span>Pontuação final</span><strong id="final-stat-score">0</strong></div>
-          <div class="stat-row"><span>Total de acertos</span><strong id="final-stat-correct">0</strong></div>
-          <div class="stat-row"><span>Total de erros</span><strong id="final-stat-wrong">0</strong></div>
-          <div class="stat-row"><span>Melhor combo</span><strong id="final-stat-combo">x0</strong></div>
-        </div>
-        <button id="btn-play-again" class="retro-btn retro-btn-primary">JOGAR NOVAMENTE</button>
-      </div>
-    </section>
 
-    <!-- Botão de tela cheia -->
-    <button id="btn-fullscreen" class="fullscreen-btn" title="Tela cheia">⛶ TELA CHEIA</button>
 
-  </div>
 
-  <!-- Scripts em ordem de dependência (sem módulos ES6 para funcionar via file://) -->
-  <script src="js/config.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/audio.js"></script>
-  <script src="js/player.js"></script>
-  <script src="js/npc.js"></script>
-  <script src="js/trash.js"></script>
-  <script src="js/bins.js"></script>
-  <script src="js/map.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/game.js"></script>
-  <script src="js/main.js"></script>
-</body>
-</html>

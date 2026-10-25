@@ -24,6 +24,7 @@ class Player {
     this.animFrame = 0; // 0..3 (usado para alternar as "pernas")
 
     this.carrying = null; // chave do TRASH_TYPES sendo carregado, ou null
+    this.carriedItem = null; // referência ao objeto, para devolvê-lo ao mapa em caso de erro
   }
 
   /** Retângulo de colisão (AABB). */
@@ -46,10 +47,18 @@ class Player {
     let dx = 0;
     let dy = 0;
 
-    if (keys["arrowup"] || keys["w"]) dy -= 1;
-    if (keys["arrowdown"] || keys["s"]) dy += 1;
-    if (keys["arrowleft"] || keys["a"]) dx -= 1;
-    if (keys["arrowright"] || keys["d"]) dx += 1;
+    if (map.isometric){
+      // Mantém as setas intuitivas na tela mesmo com a projeção em losango.
+      if (keys["arrowup"] || keys["w"]){ dx -= 1; dy -= 1; }
+      if (keys["arrowdown"] || keys["s"]){ dx += 1; dy += 1; }
+      if (keys["arrowleft"] || keys["a"]){ dx -= 1; dy += 1; }
+      if (keys["arrowright"] || keys["d"]){ dx += 1; dy -= 1; }
+    } else {
+      if (keys["arrowup"] || keys["w"]) dy -= 1;
+      if (keys["arrowdown"] || keys["s"]) dy += 1;
+      if (keys["arrowleft"] || keys["a"]) dx -= 1;
+      if (keys["arrowright"] || keys["d"]) dx += 1;
+    }
 
     this.moving = dx !== 0 || dy !== 0;
 
@@ -60,7 +69,12 @@ class Player {
       dy /= len;
 
       // Define a direção "visual" priorizando o eixo dominante
-      if (Math.abs(dx) > Math.abs(dy)){
+      if (map.isometric){
+        if (keys["arrowup"] || keys["w"]) this.direction = "up";
+        else if (keys["arrowdown"] || keys["s"]) this.direction = "down";
+        else if (keys["arrowleft"] || keys["a"]) this.direction = "left";
+        else this.direction = "right";
+      } else if (Math.abs(dx) > Math.abs(dy)){
         this.direction = dx > 0 ? "right" : "left";
       } else {
         this.direction = dy > 0 ? "down" : "up";
@@ -117,6 +131,12 @@ class Player {
     ctx.ellipse(s / 2, s - 4, s / 2.4, 6, 0, 0, Math.PI * 2);
     ctx.fill();
 
+    // Mochila (deixa o personagem mais legível sobre cenários coloridos)
+    ctx.fillStyle = "#f2b134";
+    ctx.beginPath();
+    ctx.roundRect(s * 0.12, s * 0.34 - bob * 0.2, s * 0.76, s * 0.4, 9);
+    ctx.fill();
+
     // Pernas (alternam levemente para simular passos)
     const legOffset = this.moving ? Math.sin(this.animFrame * (Math.PI / 2)) * 4 : 0;
     ctx.fillStyle = "#33475b";
@@ -124,8 +144,19 @@ class Player {
     ctx.fillRect(s * 0.56, s * 0.62 - legOffset * 0.3, s * 0.16, s * 0.3);
 
     // Corpo (camiseta verde - "ajudante da reciclagem")
-    ctx.fillStyle = "#3fae5c";
-    ctx.fillRect(s * 0.18, s * 0.32 - bob * 0.2, s * 0.64, s * 0.42);
+    ctx.fillStyle = "#2d9b68";
+    ctx.beginPath();
+    ctx.roundRect(s * 0.18, s * 0.32 - bob * 0.2, s * 0.64, s * 0.42, 7);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(12,68,48,0.5)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Símbolo da missão no uniforme
+    ctx.fillStyle = "#d9f8c8";
+    ctx.font = `bold ${Math.round(s * 0.22)}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.fillText("♻", s / 2, s * 0.61);
 
     // Cabeça
     ctx.fillStyle = "#f0c39a";
@@ -138,6 +169,13 @@ class Player {
     ctx.beginPath();
     ctx.arc(s / 2, s * 0.18 - bob * 0.2, s * 0.24, Math.PI, 0);
     ctx.fill();
+
+    // Boné verde, para reforçar o personagem como guia da missão.
+    ctx.fillStyle = "#176c4c";
+    ctx.beginPath();
+    ctx.arc(s / 2, s * 0.19 - bob * 0.2, s * 0.22, Math.PI * 1.08, Math.PI * 1.92);
+    ctx.fill();
+    ctx.fillRect(s * 0.5, s * 0.18 - bob * 0.2, s * 0.25, s * 0.06);
 
     // Rosto direcional (olhos indicam para onde o personagem está olhando)
     ctx.fillStyle = "#222";

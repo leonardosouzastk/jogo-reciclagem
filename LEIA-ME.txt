@@ -1,0 +1,13 @@
+TURMINHA DA RECICLAGEM
+
+Projeto em arquivos separados: mantenha index.html, style.css e script.js juntos na mesma pasta. Abra index.html em um navegador atualizado.
+
+Também está incluída uma versão autônoma chamada jogo-reciclagem-autonomo.html, que reúne HTML, CSS e JavaScript em um arquivo só.
+
+Controles:
+W A S D — movimentar
+Shift — correr
+E — pegar resíduos e interagir com as lixeiras
+Esc — pausar
+
+A música pode ser ligada ou desligada no botão do topo; o controle ao lado ajusta o volume.

@@ -14,7 +14,7 @@ class TrashItem {
     this.x = x;
     this.y = y;
     this.typeKey = typeKey;
-    this.size = 30;
+    this.size = CONFIG.TRASH_SIZE;
     this.collected = false;
     this.bobPhase = Math.random() * Math.PI * 2; // dessincroniza a animação de flutuação
   }
@@ -41,7 +41,7 @@ class TrashItem {
     ctx.ellipse(screenX + this.size / 2, screenY + this.size - 2, this.size / 2.2, 5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    drawTrashIcon(ctx, this.typeKey, screenX + this.size / 2, screenY + this.size / 2 + bob, 1);
+    drawTrashIcon(ctx, this.typeKey, screenX + this.size / 2, screenY + this.size / 2 + bob, 1.35);
   }
 }
 

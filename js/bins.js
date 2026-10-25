@@ -60,21 +60,36 @@ class Bin {
       ctx.restore();
     }
 
-    // Corpo da lixeira
-    ctx.fillStyle = cat.color;
+    // Corpo de lixeira com rodas, tampa e pega: mais próximo de uma lixeira real.
+    const bodyGradient = ctx.createLinearGradient(0, 14, 0, h);
+    bodyGradient.addColorStop(0, shadeColor(cat.color, 18));
+    bodyGradient.addColorStop(1, shadeColor(cat.color, -10));
+    ctx.fillStyle = bodyGradient;
     ctx.strokeStyle = "rgba(0,0,0,0.4)";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.roundRect(4, 14, w - 8, h - 18, 6);
+    ctx.moveTo(7, 18); ctx.lineTo(w - 7, 18); ctx.lineTo(w - 11, h - 8); ctx.lineTo(11, h - 8); ctx.closePath();
     ctx.fill();
     ctx.stroke();
+
+    // Reflexo discreto para dar volume sem perder a leitura da cor.
+    ctx.fillStyle = "rgba(255,255,255,0.28)";
+    ctx.fillRect(14, 26, 5, h - 42);
 
     // Tampa
     ctx.fillStyle = shadeColor(cat.color, -20);
     ctx.beginPath();
-    ctx.roundRect(0, 4, w, 14, 4);
+    ctx.roundRect(0, 5, w, 15, 4);
     ctx.fill();
     ctx.stroke();
+
+    // Alça, pedal e rodas.
+    ctx.fillStyle = shadeColor(cat.color, -35);
+    ctx.fillRect(w * 0.3, 1, w * 0.4, 5);
+    ctx.fillRect(w * 0.39, h - 8, w * 0.22, 4);
+    ctx.fillStyle = "#2b3540";
+    ctx.beginPath(); ctx.arc(16, h - 6, 6, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(w - 16, h - 6, 6, 0, Math.PI * 2); ctx.fill();
 
     // Símbolo de reciclagem
     ctx.fillStyle = "rgba(0,0,0,0.55)";

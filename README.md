@@ -41,8 +41,9 @@ Se o jogo for apresentado em uma TV/projetor, use o botão
    Vidro, Metal ou Orgânico).
 4. Perto da lixeira aparece **"PRESSIONE E PARA DESCARTAR"**.
 5. Acertos somam pontos e aumentam seu combo. Erros reduzem pontos,
-   zeram o combo e mostram uma dica educativa explicando o motivo.
-6. Complete os 3 níveis (Parque → Cidade → Desafio da Reciclagem) para
+   zeram o combo, tiram uma vida e mostram uma dica educativa explicando o motivo.
+   Cada fase tem 3 vidas; o resíduo volta ao mapa após um erro.
+6. Complete os 3 níveis (Quarto → Escola → Rua) para
    vencer o jogo!
 
 ---
@@ -90,6 +91,7 @@ Praticamente **tudo que se costuma querer alterar está em
 |---|---|
 | Velocidade do personagem | `CONFIG.PLAYER_SPEED` |
 | Tamanho do personagem | `CONFIG.PLAYER_SIZE` |
+| Tamanho dos resíduos | `CONFIG.TRASH_SIZE` |
 | Velocidade/suavidade da câmera | `CONFIG.CAMERA_SMOOTH` |
 | Raio de interação (pegar/descartar) | `CONFIG.INTERACTION_RADIUS` |
 | Pontuação por acerto | `CONFIG.SCORE_CORRECT_BASE` |

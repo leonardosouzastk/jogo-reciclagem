@@ -13,18 +13,20 @@ const CONFIG = {
   TILE_SIZE: 64,
 
   // ---- Jogador ----
-  PLAYER_SPEED: 240,        // pixels por segundo
-  PLAYER_SIZE: 40,          // largura/altura da caixa de colisão
+  PLAYER_SPEED: 260,        // pixels por segundo
+  PLAYER_SIZE: 48,          // personagem em sprite detalhado 2D
+  TRASH_SIZE: 38,           // tamanho dos resíduos no mapa
   PLAYER_ANIM_FRAME_TIME: 0.12, // segundos por quadro de animação de caminhada
 
   // ---- Câmera ----
   CAMERA_SMOOTH: 8,         // quanto maior, mais rápido a câmera "gruda" no jogador
 
   // ---- Interação ----
-  INTERACTION_RADIUS: 68,   // distância para poder pegar/descartar
-  NPC_TALK_RADIUS: 90,      // distância para o NPC falar
+  INTERACTION_RADIUS: 86,   // distância para poder pegar/descartar
+  NPC_TALK_RADIUS: 118,     // distância para o NPC falar
 
   // ---- Pontuação ----
+  MAX_LIVES: 3,             // erros permitidos por fase
   SCORE_CORRECT_BASE: 100,  // pontos por acerto (1º acerto do combo)
   SCORE_COMBO_STEP: 20,     // pontos extras a cada acerto consecutivo
   SCORE_WRONG_PENALTY: -50, // pontos perdidos por erro
@@ -36,7 +38,7 @@ const CONFIG = {
   TIP_DURATION: 3600,       // ms da dica educativa (erro) na tela
 
   // ---- Fases ----
-  PHASE_TIME_LIMIT: 90,     // segundos disponíveis na Fase 3 (desafio)
+  PHASE_TIME_LIMIT: 105,    // segundos disponíveis na Fase 3 (desafio)
 
   // ---- Diálogo de NPC ----
   DIALOGUE_FADE: 0.25,      // segundos para o balão de fala aparecer/sumir
@@ -99,35 +101,35 @@ const NPC_DIALOGUES = {
 const PHASES = [
   {
     id: 1,
-    name: "FASE 1 — PARQUE",
-    mapWidthTiles: 30,
-    mapHeightTiles: 18,
-    trashCount: 5,
-    trashPool: ["PET", "LATA", "JORNAL"],
-    obstacleDensity: 14,
+    name: "FASE 1 — QUARTO",
+    mapWidthTiles: 22,
+    mapHeightTiles: 14,
+    trashCount: 4,
+    trashPool: ["PET", "JORNAL", "PAPELAO"],
+    obstacleDensity: 0,
     timeLimit: null,
-    theme: "parque",
+    theme: "quarto",
   },
   {
     id: 2,
-    name: "FASE 2 — CIDADE",
-    mapWidthTiles: 40,
-    mapHeightTiles: 24,
-    trashCount: 8,
+    name: "FASE 2 — ESCOLA",
+    mapWidthTiles: 24,
+    mapHeightTiles: 16,
+    trashCount: 6,
     trashPool: ["PET", "LATA", "JORNAL", "PAPELAO", "VIDRO_G"],
-    obstacleDensity: 26,
+    obstacleDensity: 0,
     timeLimit: null,
-    theme: "cidade",
+    theme: "escola",
   },
   {
     id: 3,
-    name: "FASE 3 — DESAFIO DA RECICLAGEM",
-    mapWidthTiles: 46,
-    mapHeightTiles: 28,
-    trashCount: 12,
+    name: "FASE 3 — RUA",
+    mapWidthTiles: 26,
+    mapHeightTiles: 17,
+    trashCount: 8,
     trashPool: ["PET", "LATA", "JORNAL", "PAPELAO", "VIDRO_G", "COMIDA"],
-    obstacleDensity: 38,
+    obstacleDensity: 0,
     timeLimit: CONFIG.PHASE_TIME_LIMIT,
-    theme: "desafio",
+    theme: "rua",
   },
 ];

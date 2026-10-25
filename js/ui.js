@@ -32,9 +32,13 @@ class UIManager {
   }
 
   /** Preenche a tela de "fase concluída" com as estatísticas da fase. */
-  setPhaseCompleteStats(stats, isFinalPhase){
-    document.getElementById("phase-complete-title").textContent =
-      isFinalPhase ? "ÚLTIMA FASE CONCLUÍDA!" : "FASE CONCLUÍDA!";
+  setPhaseCompleteStats(stats, isFinalPhase, success, reason){
+    document.getElementById("phase-complete-title").textContent = success
+      ? (isFinalPhase ? "ÚLTIMA FASE CONCLUÍDA!" : "FASE CONCLUÍDA!")
+      : "FIM DE TENTATIVA";
+    document.getElementById("phase-complete-message").textContent = success
+      ? "Excelente! Você ajudou o planeta com a coleta seletiva."
+      : (reason || "O tempo acabou. Tente novamente!");
     document.getElementById("stat-score").textContent = stats.score;
     document.getElementById("stat-correct").textContent = stats.correct;
     document.getElementById("stat-wrong").textContent = stats.wrong;
@@ -42,7 +46,7 @@ class UIManager {
     document.getElementById("stat-recycled").textContent = `${stats.recycled}/${stats.required}`;
 
     const btn = document.getElementById("btn-next-phase");
-    btn.textContent = isFinalPhase ? "VER RESULTADO FINAL" : "PRÓXIMA FASE";
+    btn.textContent = success ? (isFinalPhase ? "VER RESULTADO FINAL" : "PRÓXIMA FASE") : "TENTAR NOVAMENTE";
   }
 
   /** Preenche a tela final com as estatísticas acumuladas do jogo todo. */
@@ -62,27 +66,34 @@ function drawHUD(ctx, state){
 
   // Painel de fundo semitransparente
   ctx.fillStyle = "rgba(10, 25, 15, 0.55)";
-  ctx.fillRect(14, 14, 300, state.timeLimit != null ? 118 : 92);
+  const panelHeight = state.timeLimit != null ? 164 : 138;
+  ctx.fillRect(14, 14, 300, panelHeight);
   ctx.strokeStyle = "rgba(139, 212, 80, 0.6)";
   ctx.lineWidth = 2;
-  ctx.strokeRect(14, 14, 300, state.timeLimit != null ? 118 : 92);
+  ctx.strokeRect(14, 14, 300, panelHeight);
 
   ctx.textAlign = "left";
   ctx.fillStyle = "#8bd450";
   ctx.font = "bold 16px Consolas, monospace";
   ctx.fillText("♻️ ECO AVENTURA", 26, 36);
+  ctx.fillStyle = "#f2b134";
+  ctx.font = "bold 12px Consolas, monospace";
+  ctx.fillText(state.phaseName, 26, 53);
 
   ctx.fillStyle = "#f4f1e2";
   ctx.font = "15px Consolas, monospace";
-  ctx.fillText(`PONTOS: ${String(state.score).padStart(4, "0")}`, 26, 60);
-  ctx.fillText(`COMBO: x${state.combo}`, 26, 80);
-  ctx.fillText(`RESÍDUOS: ${state.recycled}/${state.required}`, 160, 80);
+  ctx.fillText(`PONTOS: ${String(state.score).padStart(4, "0")}`, 26, 77);
+  ctx.fillText(`COMBO: x${state.combo}`, 26, 98);
+  ctx.fillText(`RESÍDUOS: ${state.recycled}/${state.required}`, 160, 98);
+  ctx.fillStyle = "#ff7b79";
+  ctx.font = "bold 17px sans-serif";
+  ctx.fillText(`VIDAS: ${"♥".repeat(state.lives)}${"♡".repeat(CONFIG.MAX_LIVES - state.lives)}`, 26, 122);
 
   if (state.timeLimit != null){
     const urgent = state.timeLeft <= 10;
     ctx.fillStyle = urgent ? "#e5533d" : "#f2b134";
     ctx.font = "bold 15px Consolas, monospace";
-    ctx.fillText(`TEMPO: ${Math.max(0, Math.ceil(state.timeLeft))}`, 26, 102);
+    ctx.fillText(`TEMPO: ${Math.max(0, Math.ceil(state.timeLeft))}`, 26, 146);
   }
 
   ctx.restore();
@@ -246,14 +257,15 @@ function drawTip(ctx, tip){
 /* =========================================================
    Textos flutuantes ("+100" / "-50") em coordenadas de mundo
    ========================================================= */
-function drawFloatingTexts(ctx, floatingTexts, camera){
+function drawFloatingTexts(ctx, floatingTexts, camera, map){
   ctx.save();
   ctx.textAlign = "center";
   ctx.font = "bold 20px Consolas, monospace";
   for (const f of floatingTexts){
     const progress = 1 - f.life / f.maxLife;
-    const screenX = f.x - camera.x;
-    const screenY = f.y - camera.y - progress * 40;
+    const point = map && map.isometric ? map.toScreen(f.x, f.y) : { x: f.x - camera.x, y: f.y - camera.y };
+    const screenX = point.x;
+    const screenY = point.y - progress * 40;
     ctx.globalAlpha = Utils.clamp(f.life / f.maxLife, 0, 1);
     ctx.fillStyle = f.color;
     ctx.fillText(f.text, screenX, screenY);

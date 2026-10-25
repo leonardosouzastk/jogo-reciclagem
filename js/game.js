@@ -42,6 +42,7 @@ class Game {
     this.phaseWrong = 0;
     this.phaseBestCombo = 0;
     this.recycledInPhase = 0;
+    this.lives = CONFIG.MAX_LIVES;
     this.timeLeft = null;
 
     // Feedback visual
@@ -90,6 +91,7 @@ class Game {
     this.phaseWrong = 0;
     this.phaseBestCombo = 0;
     this.recycledInPhase = 0;
+    this.lives = CONFIG.MAX_LIVES;
     this.timeLeft = phaseConfig.timeLimit;
 
     this.floatingTexts = [];
@@ -153,7 +155,7 @@ class Game {
     this.ui.showScreen("gameComplete");
   }
 
-  _completePhase(success){
+  _completePhase(success, reason = null){
     this.state = GameState.PHASE_COMPLETE;
     this.audio.stopMusic();
     if (success) this.audio.playPhaseComplete();
@@ -171,9 +173,11 @@ class Game {
         bestCombo: this.phaseBestCombo,
         recycled: this.recycledInPhase,
         required: phaseConfig.trashCount,
+        lives: this.lives,
       },
       isFinal && success,
-      success
+      success,
+      reason
     );
     this.ui.showScreen("phaseComplete");
   }
@@ -194,7 +198,7 @@ class Game {
       this.timeLeft -= dt;
       if (this.timeLeft <= 0){
         this.timeLeft = 0;
-        this._completePhase(false); // tempo esgotado
+        this._completePhase(false, "O tempo acabou. Tente novamente!");
         return;
       }
     }
@@ -286,6 +290,7 @@ class Game {
       if (nearest){
         nearest.collected = true;
         this.player.carrying = nearest.typeKey;
+        this.player.carriedItem = nearest;
         this.audio.playPickup();
       }
       return;
@@ -327,18 +332,32 @@ class Game {
       this.tip = null;
     } else {
       this.combo = 0;
+      this.lives--;
       this.totalScore = Math.max(CONFIG.SCORE_MIN, this.totalScore + CONFIG.SCORE_WRONG_PENALTY);
       this.phaseWrong++;
       this.totalWrong++;
 
+      // O item nunca é perdido: ele volta ao ponto em que foi encontrado.
+      // Assim, a fase sempre pode ser concluída enquanto ainda houver vidas.
+      if (this.player.carriedItem){
+        this.player.carriedItem.collected = false;
+        this.player.carriedItem = null;
+      }
+
       this.audio.playError();
       this._spawnFloatingText(binCenter.x, binCenter.y - 20, `${CONFIG.SCORE_WRONG_PENALTY}`, "#e5533d");
-      this._showToast(`❌ DESCARTE INCORRETO! ${CONFIG.SCORE_WRONG_PENALTY}`, "#e5533d");
+      this._showToast(`❌ DESCARTE INCORRETO! ${this.lives} VIDA${this.lives === 1 ? "" : "S"} RESTANTE${this.lives === 1 ? "" : "S"}`, "#e5533d");
       this._showTip(getWrongTip(carriedKey));
     }
 
     // O personagem sempre fica sem o item após tentar descartar
     this.player.carrying = null;
+    this.player.carriedItem = null;
+
+    if (this.lives <= 0){
+      this._completePhase(false, "Você perdeu as 3 vidas. Tente novamente!");
+      return;
+    }
 
     if (this.recycledInPhase >= PHASES[this.currentPhaseIndex].trashCount){
       this._completePhase(true);
@@ -373,12 +392,16 @@ class Game {
 
     const camera = this.camera;
     this.map.drawBackground(ctx, camera);
+    const project = (x, y) => this.map.isometric
+      ? this.map.toScreen(x, y)
+      : { x: x - camera.x, y: y - camera.y };
 
     // Resíduos no chão (sempre abaixo dos demais elementos)
     for (const item of this.map.trashItems){
       if (item.collected) continue;
-      const sx = item.x - camera.x;
-      const sy = item.y - camera.y;
+      const center = project(item.x + item.size / 2, item.y + item.size / 2);
+      const sx = center.x - item.size / 2;
+      const sy = center.y - item.size / 2;
       if (sx < -50 || sx > CONFIG.CANVAS_WIDTH + 50 || sy < -50 || sy > CONFIG.CANVAS_HEIGHT + 50) continue;
       item.draw(ctx, sx, sy);
     }
@@ -387,23 +410,29 @@ class Game {
     const depthList = [];
 
     for (const obs of this.map.obstacles){
-      depthList.push({ bottom: obs.y + obs.h, draw: () => drawObstacle(ctx, obs, obs.x - camera.x, obs.y - camera.y) });
+      if (this.map.isometric && obs.type === "wall") continue;
+      const center = project(obs.x + obs.w / 2, obs.y + obs.h / 2);
+      depthList.push({ bottom: obs.y + obs.h, draw: () => drawObstacle(ctx, obs, center.x - obs.w / 2, center.y - obs.h / 2) });
     }
     for (const bin of this.map.bins){
-      depthList.push({ bottom: bin.y + bin.h, draw: () => bin.draw(ctx, bin.x - camera.x, bin.y - camera.y) });
+      const center = project(bin.x + bin.w / 2, bin.y + bin.h / 2);
+      depthList.push({ bottom: bin.y + bin.h, draw: () => bin.draw(ctx, center.x - bin.w / 2, center.y - bin.h / 2) });
     }
     for (const npc of this.map.npcs){
-      depthList.push({ bottom: npc.y + npc.size, draw: () => npc.draw(ctx, npc.x - camera.x, npc.y - camera.y) });
+      const center = project(npc.x + npc.size / 2, npc.y + npc.size / 2);
+      depthList.push({ bottom: npc.y + npc.size, draw: () => npc.draw(ctx, center.x - npc.size / 2, center.y - npc.size / 2) });
     }
-    depthList.push({ bottom: this.player.y + this.player.size, draw: () => this.player.draw(ctx, this.player.x - camera.x, this.player.y - camera.y) });
+    const playerCenter = project(this.player.x + this.player.size / 2, this.player.y + this.player.size / 2);
+    depthList.push({ bottom: this.player.y + this.player.size, draw: () => this.player.draw(ctx, playerCenter.x - this.player.size / 2, playerCenter.y - this.player.size / 2) });
 
     depthList.sort((a, b) => a.bottom - b.bottom);
     depthList.forEach(entry => entry.draw());
 
     // Balões de diálogo dos NPCs (sempre por cima do cenário)
     for (const npc of this.map.npcs){
-      const sx = npc.x - camera.x + npc.size / 2;
-      const sy = npc.y - camera.y;
+      const center = project(npc.x + npc.size / 2, npc.y + npc.size / 2);
+      const sx = center.x;
+      const sy = center.y - npc.size / 2;
       drawDialogueBubble(ctx, npc, sx, sy);
     }
 
@@ -414,6 +443,8 @@ class Game {
     drawHUD(ctx, {
       score: this.totalScore,
       combo: this.combo,
+      phaseName: PHASES[this.currentPhaseIndex].name,
+      lives: this.lives,
       recycled: this.recycledInPhase,
       required: PHASES[this.currentPhaseIndex].trashCount,
       timeLimit: PHASES[this.currentPhaseIndex].timeLimit,
@@ -422,20 +453,24 @@ class Game {
     });
 
     // Feedback (textos flutuantes, toast, dica)
-    drawFloatingTexts(ctx, this.floatingTexts, camera);
+    drawFloatingTexts(ctx, this.floatingTexts, camera, this.map);
     drawToast(ctx, this.toast);
     drawTip(ctx, this.tip);
   }
 
   _renderInteractionPrompt(ctx, camera){
     const pc = this.player.getCenter();
+    const project = (x, y) => this.map.isometric
+      ? this.map.toScreen(x, y)
+      : { x: x - camera.x, y: y - camera.y };
 
     if (!this.player.carrying){
       for (const item of this.map.trashItems){
         if (item.collected) continue;
         const c = item.getCenter();
         if (Utils.distance(pc.x, pc.y, c.x, c.y) <= CONFIG.INTERACTION_RADIUS){
-          drawInteractionPrompt(ctx, c.x - camera.x, c.y - camera.y, "PRESSIONE E PARA PEGAR");
+          const point = project(c.x, c.y);
+          drawInteractionPrompt(ctx, point.x, point.y, "PRESSIONE E PARA PEGAR");
           break;
         }
       }
@@ -444,7 +479,8 @@ class Game {
         const c = bin.getCenter();
         if (Utils.distance(pc.x, pc.y, c.x, c.y) <= CONFIG.INTERACTION_RADIUS){
           // Posicionado acima do rótulo da lixeira para não sobrepor o texto da categoria
-          drawInteractionPrompt(ctx, c.x - camera.x, bin.y - camera.y - 18, "PRESSIONE E PARA DESCARTAR");
+          const point = project(c.x, bin.y);
+          drawInteractionPrompt(ctx, point.x, point.y - 18, "PRESSIONE E PARA DESCARTAR");
           break;
         }
       }
